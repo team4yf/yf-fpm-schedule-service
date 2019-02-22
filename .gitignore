@@ -7,3 +7,4 @@ config.json
 /logs
 .DS_Store
 public
+*-lock.json
