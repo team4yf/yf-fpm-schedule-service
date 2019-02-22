@@ -1,0 +1,6 @@
+mysqldata/
+logs/
+config.json
+fake/
+images/
+*.md
