@@ -58,7 +58,11 @@ fpm.bindRouter(router);
 
 fpm.run()
 	.then(fpm => { 
-		fpm.set('debug', true);
+    fpm.set('debug', true);
+    const { storage } = fpm.getConfig('schedule');
+    if(storage == 'disk'){
+      return;
+    }
     fpm.M.init(path.join(fpm.get('CWD'), 'sql'))
 			.then(() => {
 				fpm.logger.info('Sql Script Execute OK')

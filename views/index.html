@@ -127,88 +127,78 @@
               <form role="form">
                 <!-- text input -->
                 <div class="form-group">
-                  <label>Text</label>
-                  <input type="text" class="form-control" placeholder="Enter ...">
+                  <label>Name</label>
+                  <input type="text" class="form-control" ng-model="schedule.name" placeholder="Type the Schedule's Name">
+                </div>
+
+                <div class="form-group">
+                  <label>Cron</label>
+                  <input type="text" class="form-control" ng-model="schedule.cron" placeholder="Type the Schedule's Cron">
+                  <span class="help-block">The CRON manual: <a href="https://github.com/node-schedule/node-schedule#jobs-and-scheduling" target="_blank">Click Me</a></span>
+                </div>
+
+                <div class="row">
+                  <div class="col-lg-6">
+                    <div class="form-group">
+                      <label>Autorun</label>
+                      <div class="radio">
+                        <label>
+                          <input type="radio" name="autorun" value="1" checked="">
+                          YES
+                        </label>
+                      </div>
+                      <div class="radio">
+                        <label>
+                          <input type="radio" name="autorun" value="0">
+                          NO
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-6">
+                    <div class="form-group">
+                      <label>Type</label>
+                      <div class="radio">
+                        <label>
+                          <input type="radio" name="type" value="option1" checked="">
+                          BIZ
+                        </label>
+                      </div>
+                      <div class="radio">
+                        <label>
+                          <input type="radio" name="type" value="option3">
+                          WEB
+                        </label>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              
+                <div class="form-group">
+                  <label>Method</label>
+                  <input type="text" class="form-control" ng-model="schedule.method" placeholder="Type the Schedule's Method">
+                </div>
+
+                <div class="form-group">
+                  <label>Version</label>
+                  <input type="text" class="form-control" ng-model="schedule.v" placeholder="Type the Schedule's Version">
+                </div>
+
+                <div class="form-group">
+                  <label>Argument</label>
+                  <textarea class="form-control" rows="3" ng-model="schedule.args" placeholder=""></textarea>
                 </div>
 
                 <!-- textarea -->
                 <div class="form-group">
-                  <label>Textarea</label>
-                  <textarea class="form-control" rows="3" placeholder="Enter ..."></textarea>
-                </div>
+                  <label>Webhook</label>
+                  <textarea class="form-control" rows="3" ng-model="schedule.webhook" placeholder=""></textarea>
+                  <span class="help-block">Only support POST the JSON webhook!<br/>
 
-                <!-- input states -->
-                <div class="form-group has-success">
-                  <label class="control-label" for="inputSuccess"><i class="fa fa-check"></i> Input with success</label>
-                  <input type="text" class="form-control" id="inputSuccess" placeholder="Enter ...">
-                  <span class="help-block">Help block with success</span>
-                </div>
-                <div class="form-group has-warning">
-                  <label class="control-label" for="inputWarning"><i class="fa fa-bell-o"></i> Input with
-                    warning</label>
-                  <input type="text" class="form-control" id="inputWarning" placeholder="Enter ...">
-                  <span class="help-block">Help block with warning</span>
-                </div>
-                <div class="form-group has-error">
-                  <label class="control-label" for="inputError"><i class="fa fa-times-circle-o"></i> Input with
-                    error</label>
-                  <input type="text" class="form-control" id="inputError" placeholder="Enter ...">
-                  <span class="help-block">Help block with error</span>
-                </div>
-
-                <!-- checkbox -->
-                <div class="form-group">
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox">
-                      Checkbox 1
-                    </label>
-                  </div>
-
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox">
-                      Checkbox 2
-                    </label>
-                  </div>
-
-                  <div class="checkbox">
-                    <label>
-                      <input type="checkbox" disabled="">
-                      Checkbox disabled
-                    </label>
-                  </div>
-                </div>
-
-                <!-- radio -->
-                <div class="form-group">
-                  <div class="radio">
-                    <label>
-                      <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked="">
-                      Option one is this and that—be sure to include why it's great
-                    </label>
-                  </div>
-                  <div class="radio">
-                    <label>
-                      <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
-                      Option two can be something else and selecting it will deselect option one
-                    </label>
-                  </div>
-                  <div class="radio">
-                    <label>
-                      <input type="radio" name="optionsRadios" id="optionsRadios3" value="option3" disabled="">
-                      Option three is disabled
-                    </label>
-                  </div>
-                </div>
-
-                <!-- select -->
-                <div class="form-group">
-                  <label>Select</label>
-                  <select class="form-control">
-                    <option>option 1</option>
-                    <option>option 2</option>
-                  </select>
+                      You can add the webhook address when you create the schedule, it will be called after the job finished!<br/>
+                      
+                      the arguments of the webhook should like `{ code: 0/-1, content: {}}`</span>
                 </div>
 
               </form>
@@ -258,6 +248,13 @@
     .controller('RootCtrl', ['$rootScope', '$scope',
     function($rootScope, $scope, ){
       $scope.jobs = [];
+      $scope.schedule = {
+        v: '0.0.1',
+        cron: '* * * * *',
+        args: '{}',
+
+
+      }
       const { Func } = fpmc;
       new Func('job.getJobs').invoke()
         .then(data => {
