@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html ng-app="app">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="/lib/admin-lte/css/AdminLTE.min.css">
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+          folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="/lib/admin-lte/css/skins/_all-skins.min.css">
+  </head>
+  <body ng-controller="RootCtrl" class="hold-transition skin-blue layout-top-nav">
+    {% raw %}
+    <div class="wrapper" >
+
+      <header class="main-header">
+        <nav class="navbar navbar-static-top">
+          <div class="container">
+            <div class="navbar-header">
+              <a class="navbar-brand"><b>Schedule Job Manager</b></a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
+              <ul class="nav navbar-nav">
+                <li><a href="/">Jobs</a></li>
+                <li class="active"><a href="/task">Tasks <span class="sr-only">(current)</span></a></li>
+              </ul>
+            </div>
+          </div>
+        </nav>
+      </header>
+      <!-- Full Width Column -->
+      <div class="content-wrapper">
+        <div class="container">
+          <!-- Content Header (Page header) -->
+          <section class="content-header">
+            <h1>
+              Tasks
+              <small></small>
+            </h1>
+          </section>
+          <!-- Main content -->
+          <section class="content">
+            <div class="box box-primary box-default">
+              <div class="box-header with-border">
+                <h3 class="box-title">Filter</h3>
+              </div>
+              <div class="box-body">
+                <div class="row">
+                  <div class="col-xs-6">
+                    <label class="col-sm-2 control-label">Schedule </label>    
+                    <div class="col-sm-10">
+                      <select class="form-control" ng-model="filter.schedule" ng-options="schedule.name for schedule in schedules">
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-xs-6">
+                    <label class="col-sm-2 control-label">StartAt </label>    
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control" ng-model="filter.startAt" placeholder="yyyy-MM-dd HH:mm:ss">
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-xs-6">
+                    <div class="form-group">
+                      <label class="col-sm-2 control-label">Status </label>    
+                      <div class="col-sm-10 checkbox">
+                        <label>
+                          <input type="checkbox" ng-model="filter.status.done">
+                          DONE
+                        </label>
+                        <label>
+                          <input type="checkbox" ng-model="filter.status.error">
+                          ERROR
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-xs-6">
+                    <label class="col-sm-2 control-label">FinishAt </label>    
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control" ng-model="filter.finishAt" placeholder="yyyy-MM-dd HH:mm:ss">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="box-footer">
+                <button ng-click="loadTasks()" class="btn btn-primary"><i class="fa fa-search"></i> Search</button>
+              </div>
+            </div>
+
+            <div class="box box-primary box-default">
+              <div class="box-header with-border">
+                <h3 class="box-title">List</h3>
+                <div class="box-tools">
+                  <div class="input-group input-group-sm" style="width: 150px;">
+                    TOTAL: {{ total }}
+                  </div>
+                </div>
+              </div>
+              <div class="box-body table-responsive no-padding">
+                <table class="table table-hover">
+                  <tr>
+                    <th>ID</th>
+                    <th>Status</th>
+                    <th>Args</th>
+                    <th>Result</th>
+                    <th>startAt</th>
+                    <th>finishAt</th>
+                  </tr>
+                  <tr ng-repeat="task in tasks">
+                    <td ng-bind="task.id">1</td>
+                    <td>
+                      <span ng-if="task.status == 'DONE'" class="text-green"><i class="fa fa-check"></i></span>
+                      <span ng-if="task.status == 'ERROR'" class="text-red"><i class="fa fa-close"></i></span>
+                    </td>
+                    <td ng-bind="task.args"></td>
+                    <td><span ng-if="task.status == 'DONE'" ng-bind="task.result"></span>
+                      <span ng-if="task.status == 'ERROR'" ng-bind="task.error"></span></td>
+                    <td ng-bind="task.startAt | date:'yyyy-MM-dd HH:mm:ss'"></td>
+                    <td ng-bind="task.finishAt | date:'yyyy-MM-dd HH:mm:ss'"></td>
+                  </tr>
+                </table>
+              </div>
+              <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+          </section>
+          <!-- /.content -->
+        </div>
+        <!-- /.container -->
+      </div>
+      
+      <!-- /.content-wrapper -->
+      <footer class="main-footer">
+        <div class="container">
+          <div class="pull-right hidden-xs">
+            <b>Version</b> 2.4.0
+          </div>
+          <strong>Copyright &copy; 2014-2019 <a href="https://blog.yunplus.io">Wangfan</a>.</strong> All rights
+          reserved.
+        </div>
+        <!-- /.container -->
+      </footer>
+    </div>
+    <!-- ./wrapper -->
+    {% endraw %}
+    <!-- jQuery 3 -->
+  <script src="/lib/jquery/jquery.min.js"></script>
+  <!-- Bootstrap 3.3.7 -->
+  <script src="/lib/bootstrap/js/bootstrap.min.js"></script>
+  <!-- FastClick -->
+  <script src="/lib/fastclick/fastclick.js"></script>
+  <!-- angular -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.2/angular.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js"></script>
+  <script src="/lib/sweetalert2/sweetalert2.all.min.js"></script>
+  <script src="/lib/fpmc-jssdk/fpmc-latest.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/lib/admin-lte/js/adminlte.min.js"></script>
+  <script>
+  fpmc.init({ endpoint: '/api', appkey:'123123', masterKey:'123123'});
+  const app = angular.module('app', [])
+    .controller('RootCtrl', ['$rootScope', '$scope',
+    function($rootScope, $scope, ){
+
+      const { Func, DBObject, DBQuery } = fpmc;
+
+      $scope.schedules = [];
+
+      $scope.tasks = [];
+
+      $scope.total = 0;
+
+      $scope.filter = {
+        schedule: undefined,
+        status: { done: true, error: true },
+        startAt: undefined,
+        finishAt: undefined,
+      }
+
+      new Func('job.getJobs').invoke()
+        .then(data => {
+          $scope.schedules = data;
+          $scope.$apply();
+        })
+
+      const getTimestamp = timeStr => {
+        if(_.isEmpty(timeStr)){
+          return;
+        }
+        if(!/^\d{0,4}-\d{0,2}-\d{0,2} \d{0,2}:\d{0,2}:\d{0,2}$/.test(timeStr)){
+          throw Error('Time Format Error!')
+        }
+        let dateAndTime = timeStr.split(' ');
+        let date = dateAndTime[0];
+        let time = dateAndTime[1];
+        let dateEles = date.split('-');
+        let timeEles = time.split(':');
+
+        return new Date(dateEles[0], parseInt(dateEles[1]) - 1, dateEles[2], timeEles[0], timeEles[1], timeEles[2]).getTime();
+
+      }
+
+      $scope.loadTasks = function(){
+        if($scope.filter.schedule == undefined){
+          toast('Select the schedule before search!', 'error', 2000)
+          return;
+        }
+        const conditions = [ `schedule_id = ${$scope.filter.schedule.id}` ];
+
+        const statusList = []
+        _.map($scope.filter.status, (v, k) => {
+          if(v){
+            statusList.push(`'${k}'`)
+          }
+        })
+        if(_.size(statusList)<1){
+          toast('At least one status you should check!', 'error', 2000)
+          return;
+        }
+        conditions.push(`status in (${statusList.join(',')})`)
+      
+        try{
+          $scope.filter.startAtTime = getTimestamp($scope.filter.startAt);
+          $scope.filter.finishAtTime = getTimestamp($scope.filter.finishAt);
+        }catch(e){
+          toast(e, 'error', 2000)
+          return;
+        }
+        if($scope.filter.startAtTime){
+          conditions.push(`startAt >= ${$scope.filter.startAtTime}`)
+        }
+        if($scope.filter.finishAtTime){
+          conditions.push(`finishAt <= ${$scope.filter.finishAtTime}`)
+        }
+
+        new DBQuery('job_task')
+          .condition(conditions.join(' and '))
+          .sort('id-')
+          .page(1, 10)
+          .findAndCount()
+          .then(rsp => {
+            $scope.tasks = rsp.rows;
+            $scope.total = rsp.count;
+            $scope.$apply();
+          })
+      }
+
+      const toast = (message = 'ok', type = 'success', length = 1000) => {
+        Swal({
+          position: 'top-end',
+          type: type,
+          title: message,
+          showConfirmButton: false,
+          timer: length
+        })
+      }
+
+      const confirm = (message = 'Are you sure?') => {
+        return Swal({
+          title: message,
+          type: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'No',
+        })
+      }
+      
+      
+
+    }]);
+  </script>
+  </body>
+</html>

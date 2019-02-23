@@ -28,8 +28,8 @@
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
               <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Jobs <span class="sr-only">(current)</span></a></li>
-                <li><a href="#">Tasks</a></li>
+                <li class="active"><a href="/">Jobs <span class="sr-only">(current)</span></a></li>
+                <li><a href="/task">Tasks</a></li>
               </ul>
             </div>
           </div>
@@ -43,7 +43,7 @@
             <h1>
               Jobs
               <small></small>
-              <button class="btn btn-flat btn-sm bg-purple" data-toggle="modal" data-target="#modal-default"><i class="fa fa-plus"></i></button>
+              <button class="btn btn-flat btn-sm bg-purple" data-toggle="modal" data-target="#modal-create"><i class="fa fa-plus"></i></button>
             </h1>
 <!--             
             <ol class="breadcrumb">
@@ -71,15 +71,7 @@
             <div class="box box-primary box-default">
               <div class="box-header with-border">
                 <h3 class="box-title">List</h3>
-                <div class="box-tools">
-                  <div class="input-group input-group-sm" style="width: 150px;">
-                    <input type="text" name="table_search" class="form-control pull-right" placeholder="Search">
-  
-                    <div class="input-group-btn">
-                      <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
-                    </div>
-                  </div>
-                </div>
+                
               </div>
               <div class="box-body table-responsive no-padding">
                 <table class="table table-hover">
@@ -101,8 +93,10 @@
                       <span ng-if="job.autorun == 0" class="text-red"><i class="fa fa-close"></i></span></td>
                     <td ng-bind="job.method">demo.foo</td>
                     <td>
-                      <button ng-if="job.autorun == 0" class="btn btn-flat btn-xs bg-olive"><i class="fa fa-play"></i></button>
-                      <button ng-if="job.autorun == 1" class="btn btn-flat btn-xs bg-maroon"><i class="fa fa-pause"></i></button>
+                      <button ng-click="restart(job)" ng-if="job.autorun == 0" class="btn btn-flat btn-xs bg-olive"><i class="fa fa-play"></i></button>
+                      <button ng-click="pause(job)" ng-if="job.autorun == 1" class="btn btn-flat btn-xs bg-maroon"><i class="fa fa-pause"></i></button>
+                      <button ng-click="call(job)" class="btn btn-flat btn-xs bg-orange"><i class="fa fa-flash"></i></button>
+                      <button ng-click="cancel(job)" class="btn btn-flat btn-xs bg-navy"><i class="fa fa-remove"></i></button>
                     </td>
                   </tr>
                 </table>
@@ -115,7 +109,7 @@
         </div>
         <!-- /.container -->
       </div>
-      <div class="modal" id="modal-default">
+      <div class="modal" id="modal-create">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
@@ -126,30 +120,32 @@
             <div class="modal-body">
               <form role="form">
                 <!-- text input -->
-                <div class="form-group">
-                  <label>Name</label>
-                  <input type="text" class="form-control" ng-model="schedule.name" placeholder="Type the Schedule's Name">
+                <div class="form-group" ng-class="{true:'has-error'}[error.name]">
+                  <label>Name <span class="text-red">*</span></label>
+                  <input type="text" class="form-control input-sm" ng-model="schedule.name" placeholder="Type the Schedule's Name">
+                  <span class="help-block" ng-if="error.name" ng-bind="error.message"></span>
                 </div>
 
-                <div class="form-group">
-                  <label>Cron</label>
-                  <input type="text" class="form-control" ng-model="schedule.cron" placeholder="Type the Schedule's Cron">
+                <div class="form-group" ng-class="{true:'has-error'}[error.cron]">
+                  <label>Cron <span class="text-red">*</span></label>
+                  <input type="text" class="form-control input-sm" ng-model="schedule.cron" placeholder="Type the Schedule's Cron">
                   <span class="help-block">The CRON manual: <a href="https://github.com/node-schedule/node-schedule#jobs-and-scheduling" target="_blank">Click Me</a></span>
+                  <span class="help-block" ng-if="error.cron" ng-bind="error.message"></span>
                 </div>
 
                 <div class="row">
                   <div class="col-lg-6">
-                    <div class="form-group">
-                      <label>Autorun</label>
+                    <div class="form-group ipnut-sm">
+                      <label>Autorun <span class="text-red">*</span></label>
                       <div class="radio">
                         <label>
-                          <input type="radio" name="autorun" value="1" checked="">
+                          <input type="radio" name="autorun" ng-model="schedule.autorun" ng-value="1" >
                           YES
                         </label>
                       </div>
                       <div class="radio">
                         <label>
-                          <input type="radio" name="autorun" value="0">
+                          <input type="radio" name="autorun" ng-model="schedule.autorun" ng-value="0" >
                           NO
                         </label>
                       </div>
@@ -157,46 +153,38 @@
                   </div>
                   <div class="col-lg-6">
                     <div class="form-group">
-                      <label>Type</label>
-                      <div class="radio">
-                        <label>
-                          <input type="radio" name="type" value="option1" checked="">
-                          BIZ
-                        </label>
-                      </div>
-                      <div class="radio">
-                        <label>
-                          <input type="radio" name="type" value="option3">
-                          WEB
-                        </label>
-                      </div>
+                      <label>Type <span class="text-red">*</span></label>
+                      <select class="form-control input-sm" name="type" ng-model="schedule.job_type"
+                        ng-options="job_type for job_type in job_types">
+                      </select>
+                      
                     </div>
 
                   </div>
                 </div>
               
-                <div class="form-group">
-                  <label>Method</label>
-                  <input type="text" class="form-control" ng-model="schedule.method" placeholder="Type the Schedule's Method">
+                <div class="form-group" ng-class="{true:'has-error'}[error.method]">
+                  <label>Method <span class="text-red">*</span></label>
+                  <input type="text" class="form-control input-sm" ng-model="schedule.method" placeholder="Type the Schedule's Method">
+                  <span class="help-block" ng-if="error.method" ng-bind="error.message"></span>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" ng-class="{true:'has-error'}[error.v]">
                   <label>Version</label>
-                  <input type="text" class="form-control" ng-model="schedule.v" placeholder="Type the Schedule's Version">
+                  <input type="text" class="form-control input-sm" ng-model="schedule.v" placeholder="Type the Schedule's Version">
+                  <span class="help-block" ng-if="error.v" ng-bind="error.message"></span>
                 </div>
 
                 <div class="form-group">
                   <label>Argument</label>
-                  <textarea class="form-control" rows="3" ng-model="schedule.args" placeholder=""></textarea>
+                  <textarea class="form-control input-sm" rows="3" ng-model="schedule.args" placeholder=""></textarea>
                 </div>
 
                 <!-- textarea -->
                 <div class="form-group">
                   <label>Webhook</label>
-                  <textarea class="form-control" rows="3" ng-model="schedule.webhook" placeholder=""></textarea>
+                  <textarea class="form-control input-sm" rows="3" ng-model="schedule.webhook" placeholder=""></textarea>
                   <span class="help-block">Only support POST the JSON webhook!<br/>
-
-                      You can add the webhook address when you create the schedule, it will be called after the job finished!<br/>
                       
                       the arguments of the webhook should like `{ code: 0/-1, content: {}}`</span>
                 </div>
@@ -205,7 +193,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default btn-flat btn-sm pull-left" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-flat btn-sm btn-primary">Save</button>
+              <button type="button" ng-click="create()" class="btn btn-flat btn-sm btn-primary">Save</button>
             </div>
           </div>
           <!-- /.modal-content -->
@@ -220,7 +208,7 @@
           <div class="pull-right hidden-xs">
             <b>Version</b> 2.4.0
           </div>
-          <strong>Copyright &copy; 2014-2016 <a href="https://adminlte.io">Almsaeed Studio</a>.</strong> All rights
+          <strong>Copyright &copy; 2014-2019 <a href="https://blog.yunplus.io">Wangfan</a>.</strong> All rights
           reserved.
         </div>
         <!-- /.container -->
@@ -247,14 +235,47 @@
   const app = angular.module('app', [])
     .controller('RootCtrl', ['$rootScope', '$scope',
     function($rootScope, $scope, ){
-      $scope.jobs = [];
-      $scope.schedule = {
-        v: '0.0.1',
-        cron: '* * * * *',
-        args: '{}',
 
-
+      $scope.error = {
+        name: false,
+        message: '',
       }
+      $scope.jobs = [];
+      $scope.job_types = ['BIZ', 'WEB'];
+
+      const resetForm = () => {
+        $scope.schedule = {
+          v: '0.0.1',
+          cron: '* * * * *',
+          args: '{}',
+          autorun: 1,
+          job_type: 'BIZ',
+        }
+        // $scope.$apply();
+      }
+
+      resetForm();
+
+      const toast = (message = 'ok', type = 'success', length = 1000) => {
+        Swal({
+          position: 'top-end',
+          type: type,
+          title: message,
+          showConfirmButton: false,
+          timer: length
+        })
+      }
+
+      const confirm = (message = 'Are you sure?') => {
+        return Swal({
+          title: message,
+          type: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes',
+          cancelButtonText: 'No',
+        })
+      }
+      
       const { Func } = fpmc;
       new Func('job.getJobs').invoke()
         .then(data => {
@@ -262,6 +283,78 @@
           $scope.$apply();
         })
       
+      $scope.create = function(){
+        new Func('job.createCronJob').invoke($scope.schedule)
+          .then(rsp => {
+            $scope.schedule.id = rsp.id;
+            $scope.jobs[rsp.id] = $scope.schedule;
+            resetForm();
+            $scope.$apply();
+            $('#modal-create').modal('hide');
+          })
+          .catch(e => {
+            console.error(e);
+          })
+      }
+      $scope.restart = function(schedule){
+        new Func('job.restartJob').invoke(schedule)
+          .then(rsp => {
+            toast('ok')
+            $scope.jobs[schedule.id].autorun = 1;
+            $scope.$apply();
+          })
+          .catch(e => {
+            console.error(e);
+          })
+      }
+
+      $scope.pause = function(schedule){
+        new Func('job.pauseJob').invoke(schedule)
+          .then(rsp => {
+            toast('ok')
+            $scope.jobs[schedule.id].autorun = 0;
+            $scope.$apply();
+          })
+          .catch(e => {
+            console.error(e);
+          })
+      }
+
+      $scope.cancel = function(schedule){
+        confirm()
+          .then(rsp => {
+            if(rsp.dismiss == 'cancel'){
+              return;
+            }
+            new Func('job.cancelJob').invoke({ id: schedule.id })
+              .then(rsp => {
+                toast('ok')
+                delete $scope.jobs[schedule.id];
+                $scope.$apply();
+              })
+              .catch(e => {
+                console.error(e);
+              })
+          })
+        
+      }
+
+      $scope.call = function(schedule){
+        confirm()
+          .then(rsp => {
+            if(rsp.dismiss == 'cancel'){
+              return;
+            }
+            new Func('job.callJob').invoke({ id: schedule.id })
+              .then(rsp => {
+                toast('ok');
+              })
+              .catch(e => {
+                console.error(e);
+              })
+          })
+        
+      }
     }]);
   </script>
   </body>
