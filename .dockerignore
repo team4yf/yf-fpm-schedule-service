@@ -3,4 +3,6 @@ logs/
 config.json
 fake/
 images/
+db.lock
+test/
 *.md

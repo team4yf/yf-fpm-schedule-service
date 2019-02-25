@@ -1,11 +1,11 @@
 version: '3'
 services:
   mqttserver:
-    build: .
+    image: "yfsoftcom/fpm-schedule-server:latest"
     container_name: "fpm-schedule-server"
     volumes:
-      - ./source:/app/source
       - ./config.json:/app/config.json
+      - ./db.lock:/app/db.lock
     ports:
       - "9999:9999"
     networks:

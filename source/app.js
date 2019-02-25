@@ -63,11 +63,4 @@ fpm.run()
     if(storage == 'disk'){
       return;
     }
-    fpm.M.init(path.join(fpm.get('CWD'), 'sql'))
-			.then(() => {
-				fpm.logger.info('Sql Script Execute OK')
-			})
-			.catch((err) => {
-				fpm.logger.error('DB Inited~');
-			})
 	});
