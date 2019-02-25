@@ -1,6 +1,6 @@
 version: '3'
 services:
-  mqttserver:
+  scheduleserver:
     image: "yfsoftcom/fpm-schedule-server:latest"
     container_name: "fpm-schedule-server"
     volumes:
