@@ -30,7 +30,8 @@
               <ul class="nav navbar-nav">
                 <li><a href="/">Jobs</a></li>
                 <li><a href="/task">Tasks</a></li>
-                <li class="active"><a href="/dataview">Dataview <span class="sr-only">(current)</span></a></li>
+                <li class="active"><a href="/dataview">Dataview</a> <span class="sr-only">(current)</span></li>
+                <li><a href="/result">Result </a></li>
               </ul>
             </div>
           </div>
@@ -79,25 +80,27 @@
                   <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th>Job Type</th>
-                    <th>Cron</th>
-                    <th>Autorun</th>
-                    <th>Method</th>
+                    <th>Title</th>
+                    <th>Origin SQL</th>
+                    <th>Args</th>
+                    <th>Filter</th>
+                    <th>SortBy</th>
                     <th>-</th>
                   </tr>
-                  <tr ng-repeat="job in jobs">
-                    <td ng-bind="job.id">1</td>
-                    <td ng-bind="job.name">demo</td>
-                    <td><span class="label label-default" ng-bind="job.job_type"></span></td>
-                    <td ng-bind="job.cron"></td>
-                    <td><span ng-if="job.autorun == 1" class="text-green"><i class="fa fa-check"></i></span>
-                      <span ng-if="job.autorun == 0" class="text-red"><i class="fa fa-close"></i></span></td>
-                    <td ng-bind="job.method">demo.foo</td>
+                  <tr ng-repeat="dataview in dataviews">
+                    <td ng-bind="dataview.id"></td>
+                    <td ng-bind="dataview.name"></td>
+                    <td ng-bind="dataview.title" ></td>
+                    <td ng-bind="dataview.origin_sql"></td>
+                    <td ng-bind="dataview.args"></td>
+                    <td ng-bind="dataview.filter"></td>
+                    <td ng-bind="dataview.sortBy"></td>
                     <td>
-                      <button ng-click="restart(job)" ng-if="job.autorun == 0" class="btn btn-flat btn-xs bg-olive"><i class="fa fa-play"></i></button>
-                      <button ng-click="pause(job)" ng-if="job.autorun == 1" class="btn btn-flat btn-xs bg-maroon"><i class="fa fa-pause"></i></button>
-                      <button ng-click="call(job)" class="btn btn-flat btn-xs bg-orange"><i class="fa fa-flash"></i></button>
-                      <button ng-click="cancel(job)" class="btn btn-flat btn-xs bg-navy"><i class="fa fa-remove"></i></button>
+                      <button ng-click="call(dataview)" class="btn btn-flat btn-xs bg-orange"><i class="fa fa-flash"></i></button>
+                      <!-- <button ng-click="restart(dataview)" ng-if="dataview.autorun == 0" class="btn btn-flat btn-xs bg-olive"><i class="fa fa-play"></i></button>
+                      <button ng-click="pause(dataview)" ng-if="dataview.autorun == 1" class="btn btn-flat btn-xs bg-maroon"><i class="fa fa-pause"></i></button>
+                      
+                      <button ng-click="cancel(dataview)" class="btn btn-flat btn-xs bg-navy"><i class="fa fa-remove"></i></button> -->
                     </td>
                   </tr>
                 </table>
@@ -116,80 +119,43 @@
             <div class="modal-header">
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">Create Job</h4>
+              <h4 class="modal-title">Create dataview</h4>
             </div>
             <div class="modal-body">
               <form role="form">
                 <!-- text input -->
                 <div class="form-group" ng-class="{true:'has-error'}[error.name]">
                   <label>Name <span class="text-red">*</span></label>
-                  <input type="text" class="form-control input-sm" ng-model="schedule.name" placeholder="Type the Schedule's Name">
+                  <input type="text" class="form-control input-sm" ng-model="dataview.name" placeholder="Type the Dataview's Name">
                   <span class="help-block" ng-if="error.name" ng-bind="error.message"></span>
                 </div>
 
-                <div class="form-group" ng-class="{true:'has-error'}[error.cron]">
-                  <label>Cron <span class="text-red">*</span></label>
-                  <input type="text" class="form-control input-sm" ng-model="schedule.cron" placeholder="Type the Schedule's Cron">
-                  <span class="help-block">The CRON manual: <a href="https://github.com/node-schedule/node-schedule#jobs-and-scheduling" target="_blank">Click Me</a></span>
-                  <span class="help-block" ng-if="error.cron" ng-bind="error.message"></span>
+                <div class="form-group" ng-class="{true:'has-error'}[error.title]">
+                  <label>Title <span class="text-red">*</span></label>
+                  <input type="text" class="form-control input-sm" ng-model="dataview.title" placeholder="Type the Dataview's Name">
+                  <span class="help-block" ng-if="error.name" ng-bind="error.message"></span>
                 </div>
 
-                <div class="row">
-                  <div class="col-lg-6">
-                    <div class="form-group ipnut-sm">
-                      <label>Autorun <span class="text-red">*</span></label>
-                      <div class="radio">
-                        <label>
-                          <input type="radio" name="autorun" ng-model="schedule.autorun" ng-value="1" >
-                          YES
-                        </label>
-                      </div>
-                      <div class="radio">
-                        <label>
-                          <input type="radio" name="autorun" ng-model="schedule.autorun" ng-value="0" >
-                          NO
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-6">
-                    <div class="form-group">
-                      <label>Type <span class="text-red">*</span></label>
-                      <select class="form-control input-sm" name="type" ng-model="schedule.job_type"
-                        ng-options="job_type for job_type in job_types">
-                      </select>
-                      
-                    </div>
-
-                  </div>
-                </div>
-              
-                <div class="form-group" ng-class="{true:'has-error'}[error.method]">
-                  <label>Method <span class="text-red">*</span></label>
-                  <input type="text" class="form-control input-sm" ng-model="schedule.method" placeholder="Type the Schedule's Method">
-                  <span class="help-block" ng-if="error.method" ng-bind="error.message"></span>
-                </div>
-
-                <div class="form-group" ng-class="{true:'has-error'}[error.v]">
-                  <label>Version</label>
-                  <input type="text" class="form-control input-sm" ng-model="schedule.v" placeholder="Type the Schedule's Version">
-                  <span class="help-block" ng-if="error.v" ng-bind="error.message"></span>
+                <div class="form-group">
+                  <label>Origin Sql</label>
+                  <textarea class="form-control input-sm" rows="3" ng-model="dataview.origin_sql" placeholder=""></textarea>
                 </div>
 
                 <div class="form-group">
                   <label>Argument</label>
-                  <textarea class="form-control input-sm" rows="3" ng-model="schedule.args" placeholder=""></textarea>
+                  <textarea class="form-control input-sm" rows="3" ng-model="dataview.args" placeholder=""></textarea>
                 </div>
 
-                <!-- textarea -->
                 <div class="form-group">
-                  <label>Webhook</label>
-                  <textarea class="form-control input-sm" rows="3" ng-model="schedule.webhook" placeholder=""></textarea>
-                  <span class="help-block">Only support POST the JSON webhook!<br/>
-                      
-                      the arguments of the webhook should like `{ code: 0/-1, content: {}}`</span>
+                  <label>Filter</label>
+                  <textarea class="form-control input-sm" rows="3" ng-model="dataview.filter" placeholder=""></textarea>
                 </div>
 
+                <div class="form-group" ng-class="{true:'has-error'}[error.sortBy]">
+                  <label>SortBy <span class="text-red">*</span></label>
+                  <input type="text" class="form-control input-sm" ng-model="dataview.sortBy" placeholder="Type the Dataview's sortBy">
+                  <span class="help-block" ng-if="error.name" ng-bind="error.message"></span>
+                </div>
               </form>
             </div>
             <div class="modal-footer">
@@ -245,12 +211,11 @@
       
 
       const resetForm = () => {
-        $scope.schedule = {
-          v: '0.0.1',
-          cron: '* * * * *',
+        $scope.dataview = {
+          title: 'Untitled',
+          filter: ' 1 = 1 ',
           args: '{}',
-          autorun: 1,
-          job_type: 'BIZ',
+          sortBy: 'id-',
         }
         // $scope.$apply();
       }
@@ -277,44 +242,23 @@
         })
       }
       
-      const { Func } = fpmc;
-      new Func('job.getJobs').invoke()
+      const { Func, DBQuery } = fpmc;
+      new DBQuery('dv_dataview')
+        .findAndCount()
         .then(data => {
-          $scope.jobs = data;
+          const { count, rows } = data;
+          $scope.dataviews = rows;
           $scope.$apply();
         })
       
       $scope.create = function(){
-        new Func('job.createCronJob').invoke($scope.schedule)
+        new Func('dataview.create').invoke($scope.dataview)
           .then(rsp => {
-            $scope.schedule.id = rsp.id;
-            $scope.jobs[rsp.id] = $scope.schedule;
+            $scope.dataview.id = rsp.id;
+            $scope.dataviews.push($scope.dataview);
             resetForm();
             $scope.$apply();
             $('#modal-create').modal('hide');
-          })
-          .catch(e => {
-            console.error(e);
-          })
-      }
-      $scope.restart = function(schedule){
-        new Func('job.restartJob').invoke(schedule)
-          .then(rsp => {
-            toast('ok')
-            $scope.jobs[schedule.id].autorun = 1;
-            $scope.$apply();
-          })
-          .catch(e => {
-            console.error(e);
-          })
-      }
-
-      $scope.pause = function(schedule){
-        new Func('job.pauseJob').invoke(schedule)
-          .then(rsp => {
-            toast('ok')
-            $scope.jobs[schedule.id].autorun = 0;
-            $scope.$apply();
           })
           .catch(e => {
             console.error(e);
@@ -327,10 +271,10 @@
             if(rsp.dismiss == 'cancel'){
               return;
             }
-            new Func('job.cancelJob').invoke({ id: schedule.id })
+            new Func('dataview.canceldataview').invoke({ id: schedule.id })
               .then(rsp => {
                 toast('ok')
-                delete $scope.jobs[schedule.id];
+                delete $scope.dataviews[schedule.id];
                 $scope.$apply();
               })
               .catch(e => {
@@ -340,13 +284,13 @@
         
       }
 
-      $scope.call = function(schedule){
+      $scope.call = function(dataview){
         confirm()
           .then(rsp => {
             if(rsp.dismiss == 'cancel'){
               return;
             }
-            new Func('job.callJob').invoke({ id: schedule.id })
+            new Func('dataview.run').invoke({ dv_name: dataview.name, record: true })
               .then(rsp => {
                 toast('ok');
               })

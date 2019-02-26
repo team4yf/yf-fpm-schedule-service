@@ -29,9 +29,9 @@
             <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
               <ul class="nav navbar-nav">
                 <li><a href="/">Jobs</a></li>
-                <li class="active"><a href="/task">Tasks <span class="sr-only">(current)</span></a></li>
+                <li><a href="/result">results</a></li>
                 <li><a href="/dataview">Dataview</a></li>
-                <li><a href="/result">Result </a></li>
+                <li class="active"><a href="/result">Result <span class="sr-only">(current)</span></a></li>
               </ul>
             </div>
           </div>
@@ -43,7 +43,7 @@
           <!-- Content Header (Page header) -->
           <section class="content-header">
             <h1>
-              Tasks
+              Results
               <small></small>
             </h1>
           </section>
@@ -56,9 +56,9 @@
               <div class="box-body">
                 <div class="row">
                   <div class="col-xs-6">
-                    <label class="col-sm-2 control-label">Schedule </label>    
+                    <label class="col-sm-2 control-label">DataView </label>    
                     <div class="col-sm-10">
-                      <select class="form-control" ng-model="filter.schedule" ng-options="schedule.name for schedule in schedules">
+                      <select class="form-control" ng-model="filter.dataview" ng-options="dataview.name for dataview in dataviews">
                       </select>
                     </div>
                   </div>
@@ -94,7 +94,7 @@
                 </div>
               </div>
               <div class="box-footer">
-                <button ng-click="loadTasks()" class="btn btn-primary"><i class="fa fa-search"></i> Search</button>
+                <button ng-click="load()" class="btn btn-primary"><i class="fa fa-search"></i> Search</button>
               </div>
             </div>
 
@@ -113,21 +113,23 @@
                     <th>ID</th>
                     <th>Status</th>
                     <th>Args</th>
+                    <th>Real Sql</th>
                     <th>Result</th>
                     <th>startAt</th>
                     <th>finishAt</th>
                   </tr>
-                  <tr ng-repeat="task in tasks">
-                    <td ng-bind="task.id">1</td>
+                  <tr ng-repeat="result in results">
+                    <td ng-bind="result.id">1</td>
                     <td>
-                      <span ng-if="task.status == 'DONE'" class="text-green"><i class="fa fa-check"></i></span>
-                      <span ng-if="task.status == 'ERROR'" class="text-red"><i class="fa fa-close"></i></span>
+                      <span ng-if="result.status == 'DONE'" class="text-green"><i class="fa fa-check"></i></span>
+                      <span ng-if="result.status == 'ERROR'" class="text-red"><i class="fa fa-close"></i></span>
                     </td>
-                    <td ng-bind="task.args"></td>
-                    <td><span ng-if="task.status == 'DONE'" ng-bind="task.result"></span>
-                      <span ng-if="task.status == 'ERROR'" ng-bind="task.error"></span></td>
-                    <td ng-bind="task.startAt | date:'yyyy-MM-dd HH:mm:ss'"></td>
-                    <td ng-bind="task.finishAt | date:'yyyy-MM-dd HH:mm:ss'"></td>
+                    <td ng-bind="result.args"></td>
+                    <td ng-bind="result.real_sql"></td>
+                    <td><span ng-if="result.status == 'DONE'" ng-bind="result.result"></span>
+                      <span ng-if="result.status == 'ERROR'" ng-bind="result.error"></span></td>
+                    <td ng-bind="result.startAt | date:'yyyy-MM-dd HH:mm:ss'"></td>
+                    <td ng-bind="result.finishAt | date:'yyyy-MM-dd HH:mm:ss'"></td>
                   </tr>
                 </table>
               </div>
@@ -176,22 +178,24 @@
 
       const { Func, DBObject, DBQuery } = fpmc;
 
-      $scope.schedules = [];
+      $scope.dataviews = [];
 
-      $scope.tasks = [];
+      $scope.results = [];
 
       $scope.total = 0;
 
       $scope.filter = {
-        schedule: undefined,
+        dataview: undefined,
         status: { done: true, error: true },
         startAt: undefined,
         finishAt: undefined,
       }
 
-      new Func('job.getJobs').invoke()
+      new DBQuery('dv_dataview')
+        .page(1, 100)
+        .find()
         .then(data => {
-          $scope.schedules = data;
+          $scope.dataviews = data;
           $scope.$apply();
         })
 
@@ -212,12 +216,12 @@
 
       }
 
-      $scope.loadTasks = function(){
-        if($scope.filter.schedule == undefined){
-          toast('Select the schedule before search!', 'error', 2000)
+      $scope.load = function(){
+        if($scope.filter.dataview == undefined){
+          toast('Select the dataview before search!', 'error', 2000)
           return;
         }
-        const conditions = [ `schedule_id = ${$scope.filter.schedule.id}` ];
+        const conditions = [ `dv_name = '${$scope.filter.dataview.name}'` ];
 
         const statusList = []
         _.map($scope.filter.status, (v, k) => {
@@ -245,13 +249,13 @@
           conditions.push(`finishAt <= ${$scope.filter.finishAtTime}`)
         }
 
-        new DBQuery('job_task')
+        new DBQuery('dv_result')
           .condition(conditions.join(' and '))
           .sort('id-')
           .page(1, 10)
           .findAndCount()
           .then(rsp => {
-            $scope.tasks = rsp.rows;
+            $scope.results = rsp.rows;
             $scope.total = rsp.count;
             $scope.$apply();
           })
