@@ -45,7 +45,7 @@
             <h1>
               DataView
               <small></small>
-              <button class="btn btn-flat btn-sm bg-purple" data-toggle="modal" data-target="#modal-create"><i class="fa fa-plus"></i></button>
+              <button class="btn btn-flat btn-sm bg-purple" ng-click="showForm()"><i class="fa fa-plus"></i></button>
             </h1>
 <!--             
             <ol class="breadcrumb">
@@ -88,19 +88,16 @@
                     <th>-</th>
                   </tr>
                   <tr ng-repeat="dataview in dataviews">
-                    <td ng-bind="dataview.id"></td>
-                    <td ng-bind="dataview.name"></td>
-                    <td ng-bind="dataview.title" ></td>
-                    <td ng-bind="dataview.origin_sql"></td>
-                    <td ng-bind="dataview.args"></td>
+                    <td ng-bind="dataview.id" ng-click="detail(dataview)"></td>
+                    <td ng-bind="dataview.name" ng-click="detail(dataview)"></td>
+                    <td ng-bind="dataview.title" ng-click="detail(dataview)" ></td>
+                    <td ng-bind="dataview.origin_sql" ng-click="detail(dataview)"></td>
+                    <td ng-bind="dataview.args" ng-click="detail(dataview)"></td>
                     <td ng-bind="dataview.filter"></td>
                     <td ng-bind="dataview.sortBy"></td>
                     <td>
                       <button ng-click="call(dataview)" class="btn btn-flat btn-xs bg-orange"><i class="fa fa-flash"></i></button>
-                      <!-- <button ng-click="restart(dataview)" ng-if="dataview.autorun == 0" class="btn btn-flat btn-xs bg-olive"><i class="fa fa-play"></i></button>
-                      <button ng-click="pause(dataview)" ng-if="dataview.autorun == 1" class="btn btn-flat btn-xs bg-maroon"><i class="fa fa-pause"></i></button>
-                      
-                      <button ng-click="cancel(dataview)" class="btn btn-flat btn-xs bg-navy"><i class="fa fa-remove"></i></button> -->
+                      <button ng-click="drop(dataview)" class="btn btn-flat btn-xs bg-navy"><i class="fa fa-remove"></i></button>
                     </td>
                   </tr>
                 </table>
@@ -126,7 +123,7 @@
                 <!-- text input -->
                 <div class="form-group" ng-class="{true:'has-error'}[error.name]">
                   <label>Name <span class="text-red">*</span></label>
-                  <input type="text" class="form-control input-sm" ng-model="dataview.name" placeholder="Type the Dataview's Name">
+                  <input ng-disabled="!isCreate" type="text" class="form-control input-sm" ng-model="dataview.name" placeholder="Type the Dataview's Name">
                   <span class="help-block" ng-if="error.name" ng-bind="error.message"></span>
                 </div>
 
@@ -207,8 +204,9 @@
         name: false,
         message: '',
       }
-      $scope.dataviews = [];
+      $scope.dataviews = {};
       
+      $scope.isCreate = true;
 
       const resetForm = () => {
         $scope.dataview = {
@@ -242,20 +240,50 @@
         })
       }
       
-      const { Func, DBQuery } = fpmc;
+      const { Func, DBQuery, DBObject } = fpmc;
       new DBQuery('dv_dataview')
         .findAndCount()
         .then(data => {
           const { count, rows } = data;
-          $scope.dataviews = rows;
+          $scope.dataviews = _.keyBy(rows, 'id');
           $scope.$apply();
         })
       
+      $scope.showForm = function(){
+        $scope.isCreate = true;
+        resetForm();
+        $('#modal-create').modal('show');
+      }
+
+      $scope.detail = function(dataview) {
+        $scope.isCreate = false;
+        $scope.dataview = _.assign($scope.dataview, dataview);
+        $('#modal-create').modal('show');
+      }
+
       $scope.create = function(){
-        new Func('dataview.create').invoke($scope.dataview)
+        $scope.isCreate = ($scope.dataview.id === undefined);
+        if($scope.isCreate){
+          new Func('dataview.create').invoke($scope.dataview)
+            .then(rsp => {
+              $scope.dataview.id = rsp.id;
+              $scope.dataviews[rsp.id] = $scope.dataview;
+              resetForm();
+              $scope.$apply();
+              $('#modal-create').modal('hide');
+            })
+            .catch(e => {
+              console.error(e);
+            })
+          return;
+        }
+        const row = _.clone($scope.dataview);
+        const id = row.id;
+        delete row.id;
+        new DBObject('dv_dataview', { id: id })
+          .save(row)
           .then(rsp => {
-            $scope.dataview.id = rsp.id;
-            $scope.dataviews.push($scope.dataview);
+            $scope.dataviews[id] = $scope.dataview;
             resetForm();
             $scope.$apply();
             $('#modal-create').modal('hide');
@@ -265,16 +293,17 @@
           })
       }
 
-      $scope.cancel = function(schedule){
+      $scope.drop = function(dataview){
         confirm()
           .then(rsp => {
             if(rsp.dismiss == 'cancel'){
               return;
             }
-            new Func('dataview.canceldataview').invoke({ id: schedule.id })
+            new DBObject('dv_dataview')
+              .remove(dataview.id)
               .then(rsp => {
                 toast('ok')
-                delete $scope.dataviews[schedule.id];
+                delete $scope.dataviews[dataview.id];
                 $scope.$apply();
               })
               .catch(e => {
