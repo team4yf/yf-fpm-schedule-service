@@ -20,15 +20,13 @@
   "author": "FPM-TEAM",
   "license": "ISC",
   "dependencies": {
-    "babel-runtime": "^6.0.0",
-    "fpm-plugin-dataview": "^1.0.0",
     "fpm-plugin-mysql": "^1.2.0",
-    "fpm-plugin-schedule": "^2.2.4",
+    "fpm-plugin-schedule": "^2.2.5",
     "koa-static": "^5.0.0",
     "koa-views": "^6.1.5",
     "lodash": "^4.17.11",
     "nunjucks": "^3.1.7",
-    "yf-fpm-server": "^2.5.0"
+    "yf-fpm-server": "^2.6.1"
   },
   "devDependencies": {
     "admin-lte": "^2.4.9",

@@ -30,9 +30,9 @@ const router = fpm.createRouter();
 
 router.get('/', async ctx => {
 	try{
-		await ctx.render('index.html');
+		const { storage = 'disk' } = fpm.getConfig('schedule', { storage: 'disk' } )
+		await ctx.render('index.html', { storage, });
 	}catch(e){
-		console.error(e.toString());
 		const showError = fpm.get('debug') === true ? {error: e.toString()} : {};
 		await ctx.render('404.html', showError);
 	}
@@ -60,7 +60,7 @@ fpm.run()
 	.then(fpm => { 
     fpm.set('debug', true);
     const { storage } = fpm.getConfig('schedule');
-    if(storage == 'disk'){
+    if(storage === 'disk'){
       return;
     }
 	});
