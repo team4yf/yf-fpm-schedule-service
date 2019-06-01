@@ -179,7 +179,7 @@
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-default btn-flat btn-sm pull-left" data-dismiss="modal">Close</button>
-              <button type="button" ng-click="create()" class="btn btn-flat btn-sm btn-primary">Save</button>
+              <button type="button" ng-disabled="!isCreate" ng-click="create()" class="btn btn-flat btn-sm btn-primary">Save</button>
             </div>
           </div>
           <!-- /.modal-content -->
@@ -308,22 +308,7 @@
               console.error(e);
             })
           return;
-        }
-        const row = _.clone($scope.schedule);
-        const id = row.id;
-        delete row.id;
-        new DBObject('job_schedule', { id: id })
-          .save(row)
-          .then(rsp => {
-            $scope.jobs[id] = $scope.schedule;
-            resetForm();
-            $scope.$apply();
-            $('#modal-create').modal('hide');
-          })
-          .catch(e => {
-            console.error(e);
-          })
-        
+        }        
       }
 
       $scope.detail = function(job) {
@@ -382,7 +367,7 @@
             }
             new Func('job.callJob').invoke({ id: schedule.id })
               .then(rsp => {
-                console.log(rsp)
+                
                 toast('ok');
               })
               .catch(e => {

@@ -55,6 +55,13 @@ router.get('/:page', async ctx => {
 
 fpm.bindRouter(router);
 
+fpm.subscribe('#cronjob/done', (topic, message) => {
+	console.log(topic, message)
+})
+
+fpm.subscribe('#cronjob/error', (topic, message) => {
+	console.log(topic, message)
+})
 
 fpm.run()
 	.then(fpm => { 
